@@ -8,12 +8,13 @@ class Player():
         self.factor = 1.5
         self.rect.w = self.rect.w - (self.offset+13) * self.factor
         self.rect.h = self.rect.h - self.offset * self.factor
-        self.velocity = 200
+        self.velocity = 250
         self.flipped = True
+        self.score = 0 
     def draw(self, screen):
         flipped_img = pygame.transform.flip(self.image,self.flipped, False)
         screen.blit(flipped_img,(self.rect.x-self.offset * self.factor, self.rect.y-self.offset * self.factor))
-        pygame.draw.rect(screen, (0,255,0),(self.rect.x, self.rect.y,self.rect.w,self.rect.h), 1)
+        # pygame.draw.rect(screen, (0,255,0),(self.rect.x, self.rect.y,self.rect.w,self.rect.h), 1)
     def move(self, dt):
         pressed = pygame.key.get_pressed()
         dx = 0 

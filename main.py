@@ -17,11 +17,11 @@ class Game():
         
         #player
         pimg = pygame.image.load("Emu.png")
-        pimg = pygame.transform.scale(pimg, (175//1.5,175//1.5))
+        pimg = pygame.transform.scale(pimg, (175//2,175//2))
         
         #enemy
         eing = pygame.image.load("Donie.png")
-        eing = pygame.transform.scale(eing, (150/1.5, 150/1.5))
+        eing = pygame.transform.scale(eing, (150/2.5, 150/2.5))
         
         #clock
         self.clock = pygame.time.Clock()
@@ -31,9 +31,10 @@ class Game():
         cimg = pygame.transform.scale(cimg, (50/1.5, 50/1.5))
          
         self.player = Player(75,50, pimg)
-        self.enemy1 = Enemy(650,175, eing)
-        self.enemy2 = Enemy(390,375, eing)
-        self.enemy3 = Enemy(350,90,eing)
+        self.enemy_group = pygame.sprite.Group()
+        self.enemy_group.add(Enemy(650,195, eing, 500, 675))
+        self.enemy_group.add(Enemy(390,395, eing,380,670))
+        self.enemy_group.add(Enemy(350,115,eing,220,375))
         
         #wall
         self.wall_group = pygame.sprite.Group()
@@ -54,6 +55,15 @@ class Game():
         self.coin_group.add(Coin(675, 550,cimg))
         self.coin_group.add(Coin(375, 45,cimg))
         self.coin_group.add(Coin(100, 525,cimg))
+        
+        #Score
+        #font
+        self.font = pygame.font.SysFont("Comic san", 30)
+        
+        #gameover
+        self.finish = False
+        self.status = ""
+        
     def run(self):
         running = True
         while (running):
@@ -63,19 +73,52 @@ class Game():
                 if event.type == pygame.QUIT:
                     running = False
             self.screen.blit(self.bg,(0,0))
-            self.player.draw(self.screen)
-            self.player.move(delta_time)
-            self.enemy1.draw(self.screen)
-            self.enemy1.move()
-            self.enemy2.draw(self.screen)
-            self.enemy3.draw(self.screen)
-            for wall in self.wall_group:
-                wall.draw(self.screen)
-            for coin in self.coin_group:
-                coin.draw(self.screen)
-            pygame.display.update()         
+            if not self.finish:
+                self.player.draw(self.screen)
+                self.player.move(delta_time)
+                for enemy in self.enemy_group:
+                    enemy.draw(self.screen)
+                    enemy.move()
+                for wall in self.wall_group:
+                    wall.draw(self.screen)
+                for coin in self.coin_group:
+                    coin.draw(self.screen)
+                    if self.player.rect.colliderect(coin.rect):
+                        coin.kill()
+                        self.player.score += 1 
+                        if self.player.score == 4:
+                            self.finish = True
+                            self.status = "W"
+                self.wall_check()
+                self.donnie_check()
+                self.display_score()
+            else:
+                self.game_over()
+            
+                
+            pygame.display.update() 
+                
         pygame.quit()
 
-    
+    def display_score(self):
+        text = self.font.render("SCORE: "+str(self.player.score),True,(255,255,255))
+        self.screen.blit(text,(0,0))
+    def wall_check(self):
+        for wall in self.wall_group:
+            if self.player.rect.colliderect(wall.rect):
+                    self.finish =True
+                    self.status = "L"
+    def game_over(self):
+        if self.status == "L":
+            text = self.font.render("You lost LOL trash", True, (0,0,0),(0,255,255))
+            self.screen.blit(text,(300,300))
+        if self.status == "W":
+            text = self.font.render("Yow won and go touch grass :)", True,(0,0,0), (0,255,255))
+            self.screen.blit(text,(300,300))
+    def donnie_check(self):
+        for enemy in self.enemy_group:
+            if self.player.rect.colliderect(enemy.rect):
+                self.finish = True
+                self.status = "L"
 game = Game()
 game.run()
